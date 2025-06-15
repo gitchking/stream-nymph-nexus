@@ -13,10 +13,13 @@ const Header = () => {
       <div className="container mx-auto px-4 h-16 flex items-center justify-between">
         {/* Logo */}
         <Link to="/" className="flex items-center space-x-2 hover:opacity-80 transition-opacity">
-          <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
-            <span className="text-white font-bold text-sm">P</span>
+          <div className="w-8 h-8 bg-gradient-to-br from-purple-500 via-blue-500 to-cyan-500 rounded-xl flex items-center justify-center shadow-lg relative">
+            <div className="absolute inset-0 bg-gradient-to-br from-purple-600 via-blue-600 to-cyan-600 rounded-xl blur-sm opacity-50"></div>
+            <div className="relative w-4 h-4 bg-white rounded-sm flex items-center justify-center">
+              <div className="w-2 h-2 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full"></div>
+            </div>
           </div>
-          <span className="text-xl font-bold text-gradient">ProxyHub</span>
+          <span className="text-xl font-bold text-gradient">StreamHub</span>
         </Link>
 
         {/* Desktop Navigation */}
@@ -46,7 +49,7 @@ const Header = () => {
           <Link
             to="/dev-tool"
             className="p-2 hover:bg-muted rounded-lg transition-colors"
-            title="Dev Tools"
+            title="Control Panel"
           >
             <Settings className="w-5 h-5 text-purple-500" />
           </Link>
@@ -96,7 +99,7 @@ const Header = () => {
                 onClick={() => setIsMenuOpen(false)}
               >
                 <Settings className="w-4 h-4 text-purple-500" />
-                <span>Dev Tools</span>
+                <span>Control Panel</span>
               </Link>
             </nav>
           </div>

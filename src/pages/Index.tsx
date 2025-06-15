@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Flame, TrendingUp, Clock, Star } from 'lucide-react';
 import Header from '../components/Header';
@@ -74,13 +75,6 @@ const Index = () => {
       <Header />
       
       <main className="container mx-auto px-4 py-8">
-        {/* Hero Section */}
-        <div className="text-center mb-12 animate-fade-in">
-          <h1 className="text-4xl md:text-6xl font-bold text-gradient mb-4">
-            ProxyHub
-          </h1>
-        </div>
-
         {/* Category Tabs */}
         <div className="flex justify-center mb-8 animate-slide-up">
           <div className="glass-effect rounded-lg p-1">
@@ -131,13 +125,16 @@ const Index = () => {
       <footer className="border-t border-border bg-muted/20 py-8 mt-16">
         <div className="container mx-auto px-4 text-center">
           <div className="flex items-center justify-center space-x-2 mb-4">
-            <div className="w-6 h-6 bg-gradient-to-br from-blue-500 to-purple-600 rounded-md flex items-center justify-center">
-              <span className="text-white font-bold text-xs">P</span>
+            <div className="w-6 h-6 bg-gradient-to-br from-purple-500 via-blue-500 to-cyan-500 rounded-lg flex items-center justify-center shadow-lg relative">
+              <div className="absolute inset-0 bg-gradient-to-br from-purple-600 via-blue-600 to-cyan-600 rounded-lg blur-sm opacity-50"></div>
+              <div className="relative w-3 h-3 bg-white rounded-sm flex items-center justify-center">
+                <div className="w-1.5 h-1.5 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full"></div>
+              </div>
             </div>
-            <span className="font-semibold text-gradient">ProxyHub</span>
+            <span className="font-semibold text-gradient">StreamHub</span>
           </div>
           <p className="text-sm text-muted-foreground">
-            Premium content streaming platform
+            Premium streaming platform
           </p>
         </div>
       </footer>

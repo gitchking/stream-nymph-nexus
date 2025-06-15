@@ -116,16 +116,16 @@
 
   .bg-grid-pattern {
     background-image: 
-      linear-gradient(rgba(0, 0, 0, 0.05) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(0, 0, 0, 0.05) 1px, transparent 1px);
-    background-size: 20px 20px;
+      linear-gradient(rgba(0, 0, 0, 0.15) 2px, transparent 2px),
+      linear-gradient(90deg, rgba(0, 0, 0, 0.15) 2px, transparent 2px);
+    background-size: 40px 40px;
   }
 
   .dark .bg-grid-pattern {
     background-image: 
-      linear-gradient(rgba(255, 255, 255, 0.08) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(255, 255, 255, 0.08) 1px, transparent 1px);
-    background-size: 20px 20px;
+      linear-gradient(rgba(255, 255, 255, 0.12) 2px, transparent 2px),
+      linear-gradient(90deg, rgba(255, 255, 255, 0.12) 2px, transparent 2px);
+    background-size: 40px 40px;
   }
 
   .text-gradient {

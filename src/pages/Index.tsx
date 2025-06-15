@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Flame, TrendingUp, Clock, Star } from 'lucide-react';
 import Header from '../components/Header';
@@ -78,10 +77,10 @@ const Index = () => {
         {/* Hero Section */}
         <div className="text-center mb-12 animate-fade-in">
           <h1 className="text-4xl md:text-6xl font-bold text-gradient mb-4">
-            HentaiStream.AI
+            ProxyHub
           </h1>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Premium adult content streaming platform with seamless experience and high-quality videos
+            Premium content streaming platform with seamless experience and high-quality videos
           </p>
         </div>
 
@@ -135,13 +134,13 @@ const Index = () => {
       <footer className="border-t border-border bg-muted/20 py-8 mt-16">
         <div className="container mx-auto px-4 text-center">
           <div className="flex items-center justify-center space-x-2 mb-4">
-            <div className="w-6 h-6 bg-gradient-to-br from-gray-900 to-gray-600 rounded-md flex items-center justify-center">
-              <span className="text-white font-bold text-xs">H</span>
+            <div className="w-6 h-6 bg-gradient-to-br from-gray-900 to-gray-600 dark:from-gray-100 dark:to-gray-400 rounded-md flex items-center justify-center">
+              <span className="text-white dark:text-black font-bold text-xs">P</span>
             </div>
-            <span className="font-semibold text-gradient">HentaiStream.AI</span>
+            <span className="font-semibold text-gradient">ProxyHub</span>
           </div>
           <p className="text-sm text-muted-foreground">
-            Premium adult content streaming platform
+            Premium content streaming platform
           </p>
         </div>
       </footer>

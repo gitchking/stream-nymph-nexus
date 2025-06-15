@@ -1,7 +1,8 @@
 
 import { useState } from 'react';
-import { Search, Menu, X, Upload, Settings } from 'lucide-react';
+import { Search, Menu, X, Settings } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { ThemeToggle } from './ThemeToggle';
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -12,23 +13,16 @@ const Header = () => {
       <div className="container mx-auto px-4 h-16 flex items-center justify-between">
         {/* Logo */}
         <Link to="/" className="flex items-center space-x-2 hover:opacity-80 transition-opacity">
-          <div className="w-8 h-8 bg-gradient-to-br from-gray-900 to-gray-600 rounded-lg flex items-center justify-center">
-            <span className="text-white font-bold text-sm">H</span>
+          <div className="w-8 h-8 bg-gradient-to-br from-gray-900 to-gray-600 dark:from-gray-100 dark:to-gray-400 rounded-lg flex items-center justify-center">
+            <span className="text-white dark:text-black font-bold text-sm">P</span>
           </div>
-          <span className="text-xl font-bold text-gradient">HentaiStream.AI</span>
+          <span className="text-xl font-bold text-gradient">ProxyHub</span>
         </Link>
 
         {/* Desktop Navigation */}
         <nav className="hidden md:flex items-center space-x-8">
           <Link to="/" className="text-sm font-medium hover:text-primary transition-colors">
             Home
-          </Link>
-          <Link to="/categories" className="text-sm font-medium hover:text-primary transition-colors">
-            Categories
-          </Link>
-          <Link to="/studio" className="text-sm font-medium hover:text-primary transition-colors flex items-center space-x-1">
-            <Upload className="w-4 h-4" />
-            <span>Studio</span>
           </Link>
         </nav>
 
@@ -48,6 +42,7 @@ const Header = () => {
 
         {/* Desktop Actions */}
         <div className="hidden md:flex items-center space-x-4">
+          <ThemeToggle />
           <Link
             to="/dev-tool"
             className="p-2 hover:bg-muted rounded-lg transition-colors"
@@ -91,21 +86,10 @@ const Header = () => {
               >
                 Home
               </Link>
-              <Link
-                to="/categories"
-                className="p-2 text-sm font-medium hover:bg-muted rounded-lg transition-colors"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                Categories
-              </Link>
-              <Link
-                to="/studio"
-                className="p-2 text-sm font-medium hover:bg-muted rounded-lg transition-colors flex items-center space-x-2"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                <Upload className="w-4 h-4" />
-                <span>Studio</span>
-              </Link>
+              <div className="flex items-center justify-between p-2">
+                <span className="text-sm font-medium">Theme</span>
+                <ThemeToggle />
+              </div>
               <Link
                 to="/dev-tool"
                 className="p-2 text-sm font-medium hover:bg-muted rounded-lg transition-colors flex items-center space-x-2"

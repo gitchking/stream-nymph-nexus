@@ -125,13 +125,12 @@ const Index = () => {
       <footer className="border-t border-border bg-muted/20 py-8 mt-16">
         <div className="container mx-auto px-4 text-center">
           <div className="flex items-center justify-center space-x-2 mb-4">
-            <div className="w-6 h-6 bg-gradient-to-br from-purple-500 via-blue-500 to-cyan-500 rounded-lg flex items-center justify-center shadow-lg relative">
-              <div className="absolute inset-0 bg-gradient-to-br from-purple-600 via-blue-600 to-cyan-600 rounded-lg blur-sm opacity-50"></div>
-              <div className="relative w-3 h-3 bg-white rounded-sm flex items-center justify-center">
-                <div className="w-1.5 h-1.5 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full"></div>
+            <div className="w-6 h-6 bg-foreground rounded-lg flex items-center justify-center shadow-lg">
+              <div className="w-3 h-3 bg-background rounded-sm flex items-center justify-center">
+                <div className="w-1.5 h-1.5 bg-foreground rounded-full"></div>
               </div>
             </div>
-            <span className="font-semibold text-gradient">StreamHub</span>
+            <span className="font-semibold text-foreground">ProxyHub</span>
           </div>
           <p className="text-sm text-muted-foreground">
             Premium streaming platform

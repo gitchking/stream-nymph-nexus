@@ -86,11 +86,15 @@
 
 @layer components {
   .glass-effect {
-    @apply backdrop-blur-sm bg-white/5 border border-white/10;
+    @apply backdrop-blur-xl bg-white/10 border border-white/20;
   }
 
   .glass-effect-dark {
-    @apply backdrop-blur-sm bg-black/5 border border-black/10;
+    @apply backdrop-blur-xl bg-black/10 border border-black/20;
+  }
+
+  .footer-blur {
+    @apply backdrop-blur-lg bg-background/70 border-t border-border/50;
   }
 
   .shadow-glass {
@@ -116,16 +120,16 @@
 
   .bg-grid-pattern {
     background-image: 
-      linear-gradient(rgba(0, 0, 0, 0.15) 2px, transparent 2px),
-      linear-gradient(90deg, rgba(0, 0, 0, 0.15) 2px, transparent 2px);
-    background-size: 40px 40px;
+      linear-gradient(rgba(0, 0, 0, 0.2) 3px, transparent 3px),
+      linear-gradient(90deg, rgba(0, 0, 0, 0.2) 3px, transparent 3px);
+    background-size: 50px 50px;
   }
 
   .dark .bg-grid-pattern {
     background-image: 
-      linear-gradient(rgba(255, 255, 255, 0.12) 2px, transparent 2px),
-      linear-gradient(90deg, rgba(255, 255, 255, 0.12) 2px, transparent 2px);
-    background-size: 40px 40px;
+      linear-gradient(rgba(255, 255, 255, 0.15) 3px, transparent 3px),
+      linear-gradient(90deg, rgba(255, 255, 255, 0.15) 3px, transparent 3px);
+    background-size: 50px 50px;
   }
 
   .text-gradient {

@@ -1,68 +1,140 @@
 
+import { useState, useEffect } from 'react';
+import { Flame, TrendingUp, Clock, Star } from 'lucide-react';
 import Header from '../components/Header';
+import VideoCard from '../components/VideoCard';
 
 const Index = () => {
+  const [activeTab, setActiveTab] = useState('trending');
+  const [videos, setVideos] = useState([
+    {
+      id: '1',
+      title: 'Beautiful Animation Collection Vol.1',
+      thumbnail: '/placeholder.svg',
+      duration: '12:34',
+      tags: ['animation', 'collection', 'hd'],
+      uploadDate: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
+      views: 15420
+    },
+    {
+      id: '2',
+      title: 'Premium Series Episode 5',
+      thumbnail: '/placeholder.svg', 
+      duration: '8:45',
+      tags: ['series', 'premium', 'episode'],
+      uploadDate: new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString(),
+      views: 8932
+    },
+    {
+      id: '3',
+      title: 'Artistic Masterpiece Collection',
+      thumbnail: '/placeholder.svg',
+      duration: '15:22',
+      tags: ['artistic', 'masterpiece', 'collection'],
+      uploadDate: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
+      views: 23187
+    },
+    {
+      id: '4',
+      title: 'Studio Exclusive Release',
+      thumbnail: '/placeholder.svg',
+      duration: '20:15',
+      tags: ['exclusive', 'studio', 'new'],
+      uploadDate: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
+      views: 5643
+    },
+    {
+      id: '5',
+      title: 'Classic Collection Remastered',
+      thumbnail: '/placeholder.svg',
+      duration: '18:30',
+      tags: ['classic', 'remastered', 'collection'],
+      uploadDate: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
+      views: 12087
+    },
+    {
+      id: '6',
+      title: 'Latest Release - High Quality',
+      thumbnail: '/placeholder.svg',
+      duration: '14:12',
+      tags: ['latest', 'hq', 'new'],
+      uploadDate: new Date(Date.now() - 1 * 60 * 60 * 1000).toISOString(),
+      views: 3245
+    }
+  ]);
+
+  const tabs = [
+    { id: 'trending', label: 'Trending', icon: TrendingUp },
+    { id: 'hot', label: 'Hot', icon: Flame },
+    { id: 'recent', label: 'Recent', icon: Clock },
+    { id: 'featured', label: 'Featured', icon: Star }
+  ];
+
   return (
     <div className="min-h-screen bg-background bg-grid-pattern">
       <Header />
       
-      <main className="container mx-auto px-4 py-16">
-        <div className="text-center max-w-4xl mx-auto animate-fade-in">
-          <h1 className="text-5xl md:text-7xl font-bold text-gradient mb-6 leading-tight">
-            Your Premium
-            <br />
-            <span className="text-primary">Video Hub</span>
-          </h1>
-          <p className="text-xl text-muted-foreground mb-8 leading-relaxed max-w-2xl mx-auto">
-            Discover, stream, and manage your video content with our sophisticated platform designed for the modern viewer.
-          </p>
-          
-          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-16">
-            <button className="btn-primary text-lg px-8 py-4">
-              Explore Content
-            </button>
-            <button className="btn-secondary text-lg px-8 py-4">
-              Learn More
-            </button>
-          </div>
-
-          {/* Feature Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-20">
-            <div className="bg-card rounded-xl p-8 shadow-punch border border-border/50 card-hover">
-              <div className="w-16 h-16 bg-primary/10 rounded-lg flex items-center justify-center mx-auto mb-4">
-                <div className="w-8 h-8 bg-primary rounded-md"></div>
-              </div>
-              <h3 className="text-xl font-semibold text-foreground mb-3">Premium Quality</h3>
-              <p className="text-muted-foreground">Experience content in the highest quality with our advanced streaming technology.</p>
-            </div>
-
-            <div className="bg-card rounded-xl p-8 shadow-punch border border-border/50 card-hover">
-              <div className="w-16 h-16 bg-primary/10 rounded-lg flex items-center justify-center mx-auto mb-4">
-                <div className="w-8 h-8 bg-primary rounded-md"></div>
-              </div>
-              <h3 className="text-xl font-semibold text-foreground mb-3">Smart Management</h3>
-              <p className="text-muted-foreground">Organize and manage your content library with intelligent categorization and search.</p>
-            </div>
-
-            <div className="bg-card rounded-xl p-8 shadow-punch border border-border/50 card-hover">
-              <div className="w-16 h-16 bg-primary/10 rounded-lg flex items-center justify-center mx-auto mb-4">
-                <div className="w-8 h-8 bg-primary rounded-md"></div>
-              </div>
-              <h3 className="text-xl font-semibold text-foreground mb-3">Secure Access</h3>
-              <p className="text-muted-foreground">Your content is protected with enterprise-grade security and privacy controls.</p>
+      <main className="container mx-auto px-4 py-8">
+        {/* Category Tabs */}
+        <div className="flex justify-center mb-8 animate-slide-up">
+          <div className="glass-effect rounded-lg p-1">
+            <div className="flex space-x-1">
+              {tabs.map((tab) => {
+                const Icon = tab.icon;
+                return (
+                  <button
+                    key={tab.id}
+                    onClick={() => setActiveTab(tab.id)}
+                    className={`flex items-center space-x-2 px-4 py-2 rounded-md text-sm font-medium transition-all duration-200 ${
+                      activeTab === tab.id
+                        ? 'bg-primary text-primary-foreground shadow-punch'
+                        : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
+                    }`}
+                  >
+                    <Icon className="w-4 h-4" />
+                    <span>{tab.label}</span>
+                  </button>
+                );
+              })}
             </div>
           </div>
+        </div>
+
+        {/* Video Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 animate-fade-in">
+          {videos.map((video, index) => (
+            <div
+              key={video.id}
+              className="animate-slide-up"
+              style={{ animationDelay: `${index * 0.1}s` }}
+            >
+              <VideoCard {...video} />
+            </div>
+          ))}
+        </div>
+
+        {/* Load More */}
+        <div className="text-center mt-12">
+          <button className="btn-primary">
+            Load More Videos
+          </button>
         </div>
       </main>
 
       {/* Footer */}
-      <footer className="footer-blur mt-20">
-        <div className="container mx-auto px-4 py-8">
-          <div className="text-center">
-            <p className="text-muted-foreground text-sm">
-              © 2024 ProxyHub. All rights reserved.
-            </p>
+      <footer className="border-t border-border bg-muted/20 py-8 mt-16">
+        <div className="container mx-auto px-4 text-center">
+          <div className="flex items-center justify-center space-x-2 mb-4">
+            <div className="w-6 h-6 bg-foreground rounded-lg flex items-center justify-center shadow-lg">
+              <div className="w-3 h-3 bg-background rounded-sm flex items-center justify-center">
+                <div className="w-1.5 h-1.5 bg-foreground rounded-full"></div>
+              </div>
+            </div>
+            <span className="font-semibold text-foreground">ProxyHub</span>
           </div>
+          <p className="text-sm text-muted-foreground">
+            Premium streaming platform
+          </p>
         </div>
       </footer>
     </div>

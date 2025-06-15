@@ -79,9 +79,6 @@ const Index = () => {
           <h1 className="text-4xl md:text-6xl font-bold text-gradient mb-4">
             ProxyHub
           </h1>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Premium content streaming platform with seamless experience and high-quality videos
-          </p>
         </div>
 
         {/* Category Tabs */}
@@ -134,8 +131,8 @@ const Index = () => {
       <footer className="border-t border-border bg-muted/20 py-8 mt-16">
         <div className="container mx-auto px-4 text-center">
           <div className="flex items-center justify-center space-x-2 mb-4">
-            <div className="w-6 h-6 bg-gradient-to-br from-gray-900 to-gray-600 dark:from-gray-100 dark:to-gray-400 rounded-md flex items-center justify-center">
-              <span className="text-white dark:text-black font-bold text-xs">P</span>
+            <div className="w-6 h-6 bg-gradient-to-br from-blue-500 to-purple-600 rounded-md flex items-center justify-center">
+              <span className="text-white font-bold text-xs">P</span>
             </div>
             <span className="font-semibold text-gradient">ProxyHub</span>
           </div>

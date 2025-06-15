@@ -13,8 +13,8 @@ const Header = () => {
       <div className="container mx-auto px-4 h-16 flex items-center justify-between">
         {/* Logo */}
         <Link to="/" className="flex items-center space-x-2 hover:opacity-80 transition-opacity">
-          <div className="w-8 h-8 bg-gradient-to-br from-gray-900 to-gray-600 dark:from-gray-100 dark:to-gray-400 rounded-lg flex items-center justify-center">
-            <span className="text-white dark:text-black font-bold text-sm">P</span>
+          <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+            <span className="text-white font-bold text-sm">P</span>
           </div>
           <span className="text-xl font-bold text-gradient">ProxyHub</span>
         </Link>
@@ -29,7 +29,7 @@ const Header = () => {
         {/* Search Bar */}
         <div className="hidden sm:flex items-center flex-1 max-w-md mx-8">
           <div className="relative w-full">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-blue-500" />
             <input
               type="text"
               placeholder="Search videos, tags..."
@@ -48,7 +48,7 @@ const Header = () => {
             className="p-2 hover:bg-muted rounded-lg transition-colors"
             title="Dev Tools"
           >
-            <Settings className="w-5 h-5" />
+            <Settings className="w-5 h-5 text-purple-500" />
           </Link>
         </div>
 
@@ -57,7 +57,7 @@ const Header = () => {
           className="md:hidden p-2 hover:bg-muted rounded-lg transition-colors"
           onClick={() => setIsMenuOpen(!isMenuOpen)}
         >
-          {isMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+          {isMenuOpen ? <X className="w-5 h-5 text-red-500" /> : <Menu className="w-5 h-5 text-green-500" />}
         </button>
       </div>
 
@@ -67,7 +67,7 @@ const Header = () => {
           <div className="container mx-auto px-4 py-4 space-y-4">
             {/* Mobile Search */}
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-blue-500" />
               <input
                 type="text"
                 placeholder="Search videos, tags..."
@@ -95,7 +95,7 @@ const Header = () => {
                 className="p-2 text-sm font-medium hover:bg-muted rounded-lg transition-colors flex items-center space-x-2"
                 onClick={() => setIsMenuOpen(false)}
               >
-                <Settings className="w-4 h-4" />
+                <Settings className="w-4 h-4 text-purple-500" />
                 <span>Dev Tools</span>
               </Link>
             </nav>

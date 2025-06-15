@@ -1,6 +1,5 @@
-
 import { useState, useEffect } from 'react';
-import { Lock, Shield, Database, Users, BarChart3, Download, Edit, Trash2, Eye, Upload, Settings, MessageSquare, Cloud, Plus, FileText, Image, Video } from 'lucide-react';
+import { Lock, Shield, Database, Users, BarChart3, Download, Edit, Trash2, Eye, Upload, Settings, MessageSquare, Cloud, Plus, FileText, Image, Video, Send, Bot } from 'lucide-react';
 import Header from '../components/Header';
 
 const DevTool = () => {
@@ -8,6 +7,8 @@ const DevTool = () => {
   const [password, setPassword] = useState('');
   const [activeTab, setActiveTab] = useState('videos');
   const [error, setError] = useState('');
+  const [telegramBotToken, setTelegramBotToken] = useState('');
+  const [telegramChannelId, setTelegramChannelId] = useState('');
 
   const correctPassword = 'Daman@2005';
 
@@ -42,9 +43,9 @@ const DevTool = () => {
   ];
 
   const mockTelegramFiles = [
-    { id: '1', fileName: 'video1.mp4', size: '245 MB', uploadDate: '2024-01-15', type: 'video' },
-    { id: '2', fileName: 'thumbnail1.jpg', size: '2.1 MB', uploadDate: '2024-01-15', type: 'image' },
-    { id: '3', fileName: 'document.pdf', size: '5.3 MB', uploadDate: '2024-01-14', type: 'document' },
+    { id: '1', fileName: 'video1.mp4', size: '245 MB', uploadDate: '2024-01-15', type: 'video', telegramUrl: 'https://t.me/c/123456/1' },
+    { id: '2', fileName: 'thumbnail1.jpg', size: '2.1 MB', uploadDate: '2024-01-15', type: 'image', telegramUrl: 'https://t.me/c/123456/2' },
+    { id: '3', fileName: 'document.pdf', size: '5.3 MB', uploadDate: '2024-01-14', type: 'document', telegramUrl: 'https://t.me/c/123456/3' },
   ];
 
   const stats = {
@@ -54,6 +55,34 @@ const DevTool = () => {
     activeUsers: mockUsers.filter(user => user.status === 'active').length,
     telegramFiles: mockTelegramFiles.length,
     storageUsed: '2.1 GB'
+  };
+
+  const handleTelegramUpload = async (file: File) => {
+    if (!telegramBotToken || !telegramChannelId) {
+      alert('Please configure Telegram bot token and channel ID first');
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append('chat_id', telegramChannelId);
+    formData.append('document', file);
+    formData.append('caption', `Uploaded from ProxyHub: ${file.name}`);
+
+    try {
+      const response = await fetch(`https://api.telegram.org/bot${telegramBotToken}/sendDocument`, {
+        method: 'POST',
+        body: formData
+      });
+
+      if (response.ok) {
+        alert('File uploaded to Telegram successfully!');
+      } else {
+        alert('Failed to upload to Telegram');
+      }
+    } catch (error) {
+      console.error('Telegram upload error:', error);
+      alert('Error uploading to Telegram');
+    }
   };
 
   if (!isAuthenticated) {
@@ -364,64 +393,133 @@ const DevTool = () => {
           )}
 
           {activeTab === 'telegram' && (
-            <div className="bg-card rounded-lg shadow-punch border border-border/50 overflow-hidden">
-              <div className="p-6 border-b border-border flex items-center justify-between">
-                <div>
-                  <h2 className="text-xl font-semibold text-foreground">Telegram Storage</h2>
-                  <p className="text-sm text-muted-foreground">Manage files stored via Telegram bot</p>
+            <div className="space-y-6">
+              {/* Telegram Configuration */}
+              <div className="bg-card rounded-lg p-6 shadow-punch border border-border/50">
+                <div className="flex items-center space-x-2 mb-4">
+                  <Bot className="w-5 h-5 text-blue-500" />
+                  <h2 className="text-xl font-semibold text-foreground">Telegram Bot Configuration</h2>
                 </div>
-                <button className="btn-primary flex items-center space-x-2">
-                  <MessageSquare className="w-4 h-4" />
-                  <span>Connect Bot</span>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-foreground mb-2">Bot Token</label>
+                    <input
+                      type="password"
+                      value={telegramBotToken}
+                      onChange={(e) => setTelegramBotToken(e.target.value)}
+                      placeholder="Enter your Telegram bot token..."
+                      className="w-full px-4 py-2 bg-muted/50 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-foreground mb-2">Channel ID</label>
+                    <input
+                      type="text"
+                      value={telegramChannelId}
+                      onChange={(e) => setTelegramChannelId(e.target.value)}
+                      placeholder="Enter your channel ID..."
+                      className="w-full px-4 py-2 bg-muted/50 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                    />
+                  </div>
+                </div>
+                <button className="btn-primary mt-4 flex items-center space-x-2">
+                  <Send className="w-4 h-4" />
+                  <span>Test Connection</span>
                 </button>
               </div>
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead className="bg-muted/30">
-                    <tr>
-                      <th className="text-left p-4 font-medium text-foreground">File Name</th>
-                      <th className="text-left p-4 font-medium text-foreground">Type</th>
-                      <th className="text-left p-4 font-medium text-foreground">Size</th>
-                      <th className="text-left p-4 font-medium text-foreground">Upload Date</th>
-                      <th className="text-left p-4 font-medium text-foreground">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {mockTelegramFiles.map((file) => (
-                      <tr key={file.id} className="border-t border-border hover:bg-muted/20">
-                        <td className="p-4">
-                          <div className="flex items-center space-x-2">
-                            {file.type === 'video' && <Video className="w-4 h-4 text-blue-500" />}
-                            {file.type === 'image' && <Image className="w-4 h-4 text-green-500" />}
-                            {file.type === 'document' && <FileText className="w-4 h-4 text-purple-500" />}
-                            <span className="font-medium text-foreground">{file.fileName}</span>
-                          </div>
-                        </td>
-                        <td className="p-4">
-                          <span className={`px-2 py-1 text-xs rounded-full ${
-                            file.type === 'video' ? 'bg-blue-500/10 text-blue-500' :
-                            file.type === 'image' ? 'bg-green-500/10 text-green-500' :
-                            'bg-purple-500/10 text-purple-500'
-                          }`}>
-                            {file.type}
-                          </span>
-                        </td>
-                        <td className="p-4 text-muted-foreground">{file.size}</td>
-                        <td className="p-4 text-muted-foreground">{file.uploadDate}</td>
-                        <td className="p-4">
-                          <div className="flex items-center space-x-2">
-                            <button className="p-1 hover:bg-muted rounded text-muted-foreground hover:text-foreground">
-                              <Download className="w-4 h-4" />
-                            </button>
-                            <button className="p-1 hover:bg-muted rounded text-muted-foreground hover:text-red-500">
-                              <Trash2 className="w-4 h-4" />
-                            </button>
-                          </div>
-                        </td>
+
+              {/* Telegram File Upload */}
+              <div className="bg-card rounded-lg p-6 shadow-punch border border-border/50">
+                <h3 className="text-lg font-semibold text-foreground mb-4">Upload to Telegram</h3>
+                <div className="border-2 border-dashed border-border rounded-lg p-8 text-center hover:border-primary/50 transition-colors">
+                  <Upload className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                  <h4 className="text-lg font-medium text-foreground mb-2">Upload Files to Telegram</h4>
+                  <p className="text-sm text-muted-foreground mb-4">Files will be stored in your Telegram channel</p>
+                  <input
+                    type="file"
+                    multiple
+                    onChange={(e) => {
+                      if (e.target.files) {
+                        Array.from(e.target.files).forEach(handleTelegramUpload);
+                      }
+                    }}
+                    className="hidden"
+                    id="telegram-upload"
+                  />
+                  <label htmlFor="telegram-upload" className="btn-primary cursor-pointer inline-flex items-center space-x-2">
+                    <MessageSquare className="w-4 h-4" />
+                    <span>Choose Files</span>
+                  </label>
+                </div>
+              </div>
+
+              {/* Telegram Files List */}
+              <div className="bg-card rounded-lg shadow-punch border border-border/50 overflow-hidden">
+                <div className="p-6 border-b border-border flex items-center justify-between">
+                  <div>
+                    <h2 className="text-xl font-semibold text-foreground">Telegram Storage</h2>
+                    <p className="text-sm text-muted-foreground">Manage files stored via Telegram bot</p>
+                  </div>
+                </div>
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead className="bg-muted/30">
+                      <tr>
+                        <th className="text-left p-4 font-medium text-foreground">File Name</th>
+                        <th className="text-left p-4 font-medium text-foreground">Type</th>
+                        <th className="text-left p-4 font-medium text-foreground">Size</th>
+                        <th className="text-left p-4 font-medium text-foreground">Upload Date</th>
+                        <th className="text-left p-4 font-medium text-foreground">Telegram URL</th>
+                        <th className="text-left p-4 font-medium text-foreground">Actions</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody>
+                      {mockTelegramFiles.map((file) => (
+                        <tr key={file.id} className="border-t border-border hover:bg-muted/20">
+                          <td className="p-4">
+                            <div className="flex items-center space-x-2">
+                              {file.type === 'video' && <Video className="w-4 h-4 text-blue-500" />}
+                              {file.type === 'image' && <Image className="w-4 h-4 text-green-500" />}
+                              {file.type === 'document' && <FileText className="w-4 h-4 text-purple-500" />}
+                              <span className="font-medium text-foreground">{file.fileName}</span>
+                            </div>
+                          </td>
+                          <td className="p-4">
+                            <span className={`px-2 py-1 text-xs rounded-full ${
+                              file.type === 'video' ? 'bg-blue-500/10 text-blue-500' :
+                              file.type === 'image' ? 'bg-green-500/10 text-green-500' :
+                              'bg-purple-500/10 text-purple-500'
+                            }`}>
+                              {file.type}
+                            </span>
+                          </td>
+                          <td className="p-4 text-muted-foreground">{file.size}</td>
+                          <td className="p-4 text-muted-foreground">{file.uploadDate}</td>
+                          <td className="p-4">
+                            <a 
+                              href={file.telegramUrl} 
+                              target="_blank" 
+                              rel="noopener noreferrer"
+                              className="text-blue-500 hover:text-blue-700 text-sm"
+                            >
+                              View in Telegram
+                            </a>
+                          </td>
+                          <td className="p-4">
+                            <div className="flex items-center space-x-2">
+                              <button className="p-1 hover:bg-muted rounded text-muted-foreground hover:text-foreground">
+                                <Download className="w-4 h-4" />
+                              </button>
+                              <button className="p-1 hover:bg-muted rounded text-muted-foreground hover:text-red-500">
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               </div>
             </div>
           )}

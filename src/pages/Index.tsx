@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from 'react';
-import { Flame, TrendingUp, Clock, Star } from 'lucide-react';
+import { Flame, TrendingUp, Clock, Star, Globe } from 'lucide-react';
 import Header from '../components/Header';
 import VideoCard from '../components/VideoCard';
 
@@ -71,7 +71,7 @@ const Index = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-background bg-grid-pattern">
+    <div className="min-h-screen bg-background">
       <Header />
       
       <main className="container mx-auto px-4 py-8">
@@ -121,15 +121,11 @@ const Index = () => {
         </div>
       </main>
 
-      {/* Footer */}
-      <footer className="border-t border-border bg-muted/20 py-8 mt-16">
+      {/* Blurred Footer */}
+      <footer className="footer-blur py-8 mt-16">
         <div className="container mx-auto px-4 text-center">
           <div className="flex items-center justify-center space-x-2 mb-4">
-            <div className="w-6 h-6 bg-foreground rounded-lg flex items-center justify-center shadow-lg">
-              <div className="w-3 h-3 bg-background rounded-sm flex items-center justify-center">
-                <div className="w-1.5 h-1.5 bg-foreground rounded-full"></div>
-              </div>
-            </div>
+            <Globe className="w-6 h-6 text-foreground animate-pulse" />
             <span className="font-semibold text-foreground">ProxyHub</span>
           </div>
           <p className="text-sm text-muted-foreground">

@@ -1,6 +1,6 @@
 
 import { useState } from 'react';
-import { Search, Menu, X, Settings } from 'lucide-react';
+import { Search, Menu, X, Settings, Globe } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { ThemeToggle } from './ThemeToggle';
 
@@ -11,20 +11,22 @@ const Header = () => {
   return (
     <header className="sticky top-0 z-50 bg-background/80 backdrop-blur-lg border-b border-border">
       <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-        {/* Logo */}
-        <Link to="/" className="flex items-center space-x-2 hover:opacity-80 transition-opacity">
-          <div className="w-8 h-8 bg-foreground rounded-lg flex items-center justify-center shadow-lg">
-            <div className="w-4 h-4 bg-background rounded-sm flex items-center justify-center">
-              <div className="w-2 h-2 bg-foreground rounded-full"></div>
-            </div>
+        {/* Animated Logo */}
+        <Link to="/" className="flex items-center space-x-2 hover:opacity-80 transition-all duration-300 group">
+          <div className="relative">
+            <Globe className="w-8 h-8 text-primary animate-pulse group-hover:animate-spin transition-all duration-500" />
+            <div className="absolute inset-0 bg-primary/20 rounded-full blur-sm animate-pulse"></div>
           </div>
-          <span className="text-xl font-bold text-foreground">ProxyHub</span>
+          <span className="text-xl font-bold text-gradient">ProxyHub</span>
         </Link>
 
         {/* Desktop Navigation */}
         <nav className="hidden md:flex items-center space-x-8">
           <Link to="/" className="text-sm font-medium hover:text-primary transition-colors">
             Home
+          </Link>
+          <Link to="/studio" className="text-sm font-medium hover:text-primary transition-colors">
+            Studio
           </Link>
         </nav>
 
@@ -87,6 +89,13 @@ const Header = () => {
                 onClick={() => setIsMenuOpen(false)}
               >
                 Home
+              </Link>
+              <Link
+                to="/studio"
+                className="p-2 text-sm font-medium hover:bg-muted rounded-lg transition-colors"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Studio
               </Link>
               <div className="flex items-center justify-between p-2">
                 <span className="text-sm font-medium">Theme</span>

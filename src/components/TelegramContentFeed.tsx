@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { Play, Calendar, Tag, ExternalLink, Loader2 } from 'lucide-react';
+import { Play, Calendar, Tag, ExternalLink, Loader2, RefreshCw } from 'lucide-react';
 import { Card, CardContent } from './ui/card';
 
 interface TelegramPost {
@@ -41,25 +41,65 @@ const TelegramContentFeed: React.FC<TelegramContentFeedProps> = ({
     try {
       setLoading(true);
       setError(null);
+      console.log('🔄 Fetching channel posts...', { channelId });
 
-      // Get recent messages from the channel
-      const response = await fetch(`https://api.telegram.org/bot${botToken}/getUpdates?limit=50`);
-      const data = await response.json();
+      // First, try to get chat info to verify access
+      const chatResponse = await fetch(`https://api.telegram.org/bot${botToken}/getChat?chat_id=${channelId}`);
+      const chatData = await chatResponse.json();
+      
+      console.log('📊 Chat info response:', chatData);
 
-      if (!data.ok) {
-        throw new Error(data.description || 'Failed to fetch channel posts');
+      if (!chatData.ok) {
+        throw new Error(`Cannot access channel: ${chatData.description}`);
       }
 
-      // Filter messages from our channel
-      const channelMessages = data.result.filter((update: any) => 
-        update.channel_post && 
-        update.channel_post.chat.id.toString() === channelId
-      );
+      // Try multiple methods to get messages
+      let messages: any[] = [];
+      
+      // Method 1: Try getUpdates for recent activity
+      try {
+        const updatesResponse = await fetch(`https://api.telegram.org/bot${botToken}/getUpdates?limit=100&allowed_updates=["channel_post"]`);
+        const updatesData = await updatesResponse.json();
+        console.log('📨 Updates response:', updatesData);
+        
+        if (updatesData.ok && updatesData.result) {
+          messages = updatesData.result
+            .filter((update: any) => 
+              update.channel_post && 
+              update.channel_post.chat.id.toString() === channelId
+            )
+            .map((update: any) => update.channel_post);
+        }
+      } catch (updateError) {
+        console.log('⚠️ Updates method failed:', updateError);
+      }
+
+      // Method 2: If no messages from updates, try to get recent messages by ID
+      if (messages.length === 0) {
+        console.log('🔄 Trying to fetch recent messages by ID...');
+        const recentMessageIds = Array.from({length: 10}, (_, i) => Date.now() + i);
+        
+        for (const messageId of recentMessageIds.slice(0, 5)) {
+          try {
+            const msgResponse = await fetch(
+              `https://api.telegram.org/bot${botToken}/forwardMessage?chat_id=${channelId}&from_chat_id=${channelId}&message_id=${messageId}`,
+              { method: 'POST' }
+            );
+            const msgData = await msgResponse.json();
+            if (msgData.ok) {
+              messages.push(msgData.result);
+            }
+          } catch (e) {
+            // Ignore individual message fetch errors
+          }
+        }
+      }
+
+      console.log('📝 Found messages:', messages);
 
       // Process messages into posts
       const processedPosts = await Promise.all(
-        channelMessages.map(async (update: any) => {
-          const message = update.channel_post;
+        messages.map(async (message: any) => {
           const post: TelegramPost = {
             id: `${message.chat.id}_${message.message_id}`,
             messageId: message.message_id,
@@ -77,6 +117,7 @@ const TelegramContentFeed: React.FC<TelegramContentFeedProps> = ({
             if (message.video.thumbnail) {
               post.thumbnail = await getFileUrl(message.video.thumbnail.file_id);
             }
+            post.fileUrl = await getFileUrl(message.video.file_id);
           } else if (message.photo) {
             post.type = 'photo';
             const largestPhoto = message.photo[message.photo.length - 1];
@@ -95,8 +136,13 @@ const TelegramContentFeed: React.FC<TelegramContentFeedProps> = ({
       );
 
       setPosts(processedPosts.reverse()); // Show newest first
+      
+      if (processedPosts.length === 0) {
+        setError('No posts found in channel. Try uploading some content first!');
+      }
+      
     } catch (err) {
-      console.error('Error fetching channel posts:', err);
+      console.error('❌ Error fetching channel posts:', err);
       setError(err instanceof Error ? err.message : 'Failed to fetch posts');
     } finally {
       setLoading(false);
@@ -154,10 +200,20 @@ const TelegramContentFeed: React.FC<TelegramContentFeedProps> = ({
         <div className="text-red-500 mb-2">❌ {error}</div>
         <button 
           onClick={fetchChannelPosts}
-          className="btn-secondary"
+          className="btn-secondary flex items-center space-x-2 mx-auto"
         >
-          Retry
+          <RefreshCw className="w-4 h-4" />
+          <span>Retry</span>
         </button>
+        <div className="mt-4 p-4 bg-muted/30 rounded-lg text-sm text-muted-foreground">
+          <p className="font-medium mb-2">💡 Troubleshooting Tips:</p>
+          <ul className="text-left space-y-1">
+            <li>• Make sure your bot is added as admin to the channel</li>
+            <li>• Verify the channel ID is correct (starts with -100)</li>
+            <li>• Upload some content to your channel first</li>
+            <li>• Check that your channel is not empty</li>
+          </ul>
+        </div>
       </div>
     );
   }
@@ -170,7 +226,7 @@ const TelegramContentFeed: React.FC<TelegramContentFeedProps> = ({
           onClick={fetchChannelPosts}
           className="btn-secondary flex items-center space-x-2"
         >
-          <Loader2 className="w-4 h-4" />
+          <RefreshCw className="w-4 h-4" />
           <span>Refresh</span>
         </button>
       </div>
@@ -186,7 +242,17 @@ const TelegramContentFeed: React.FC<TelegramContentFeedProps> = ({
               {/* Media Preview */}
               {(post.type === 'video' || post.type === 'photo') && (
                 <div className="relative h-48 bg-muted overflow-hidden">
-                  {post.type === 'video' && post.thumbnail ? (
+                  {post.type === 'video' && post.fileUrl ? (
+                    <div className="relative w-full h-full">
+                      <video 
+                        src={post.fileUrl}
+                        poster={post.thumbnail}
+                        className="w-full h-full object-cover"
+                        controls
+                        preload="metadata"
+                      />
+                    </div>
+                  ) : post.type === 'video' && post.thumbnail ? (
                     <div className="relative w-full h-full">
                       <img 
                         src={post.thumbnail} 
@@ -259,7 +325,7 @@ const TelegramContentFeed: React.FC<TelegramContentFeedProps> = ({
         ))}
       </div>
 
-      {posts.length === 0 && (
+      {posts.length === 0 && !loading && !error && (
         <div className="text-center py-12">
           <div className="text-6xl mb-4">📱</div>
           <h3 className="text-xl font-semibold text-foreground mb-2">No Content Yet</h3>

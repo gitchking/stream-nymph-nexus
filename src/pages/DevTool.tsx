@@ -3,24 +3,30 @@ import { Lock, Shield, Database, Users, BarChart3, Download, Edit, Trash2, Eye, 
 import Header from '../components/Header';
 import TelegramContentFeed from '../components/TelegramContentFeed';
 import VideoUploadModal from '../components/VideoUploadModal';
-import { useTelegramAPI } from '../hooks/useTelegramAPI';
 
 const DevTool = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [password, setPassword] = useState('');
   const [activeTab, setActiveTab] = useState('library');
   const [error, setError] = useState('');
+  const [telegramBotToken, setTelegramBotToken] = useState('7704391228:AAGvi1-1Mg4AttZfzvmmdFwFHefMZaT0zNM');
   const [telegramChannelId, setTelegramChannelId] = useState('');
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
   const [telegramConnectionStatus, setTelegramConnectionStatus] = useState('');
   const [isVideoUploadModalOpen, setIsVideoUploadModalOpen] = useState(false);
-  const { callTelegramAPI } = useTelegramAPI();
 
   const correctPassword = 'Daman@2005';
 
-  // Load saved Telegram credentials from localStorage
+  // Load saved Telegram credentials from localStorage and set the provided token
   useEffect(() => {
     const savedChannelId = localStorage.getItem('telegram_channel_id');
     if (savedChannelId) setTelegramChannelId(savedChannelId);
+    
+    // Auto-save the provided token
+    localStorage.setItem('telegram_bot_token', telegramBotToken);
+    setTelegramConnectionStatus('✅ Bot token has been set! Please add your channel ID and test the connection.');
+    setTimeout(() => setTelegramConnectionStatus(''), 5000);
   }, []);
 
   const handleLogin = (e: React.FormEvent) => {
@@ -40,37 +46,44 @@ const DevTool = () => {
   };
 
   const saveTelegramCredentials = () => {
+    localStorage.setItem('telegram_bot_token', telegramBotToken);
     localStorage.setItem('telegram_channel_id', telegramChannelId);
-    setTelegramConnectionStatus('✅ Channel ID saved successfully!');
+    setTelegramConnectionStatus('✅ Credentials saved successfully!');
     setTimeout(() => setTelegramConnectionStatus(''), 3000);
   };
 
   const testTelegramConnection = async () => {
+    if (!telegramBotToken) {
+      setTelegramConnectionStatus('❌ Please enter bot token first');
+      return;
+    }
+
     try {
       setTelegramConnectionStatus('🔄 Testing connection...');
+      const response = await fetch(`https://api.telegram.org/bot${telegramBotToken}/getMe`);
+      const data = await response.json();
       
-      // Test bot connection using the secure proxy
-      const botResult = await callTelegramAPI({ method: 'getMe' });
-      
-      if (botResult.ok) {
-        setTelegramConnectionStatus(`✅ Connected to bot: ${botResult.result.first_name} (@${botResult.result.username})`);
+      if (data.ok) {
+        setTelegramConnectionStatus(`✅ Connected to bot: ${data.result.first_name} (@${data.result.username})`);
         
         // If channel ID is provided, test sending a message
         if (telegramChannelId) {
           setTimeout(async () => {
             try {
-              const testResult = await callTelegramAPI({
-                method: 'sendMessage',
-                data: {
+              const testResponse = await fetch(`https://api.telegram.org/bot${telegramBotToken}/sendMessage`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
                   chat_id: telegramChannelId,
                   text: '🔧 DevTool connection test successful!'
-                }
+                })
               });
               
-              if (testResult.ok) {
+              const testData = await testResponse.json();
+              if (testData.ok) {
                 setTelegramConnectionStatus(`✅ Bot and channel verified! Ready to upload content.`);
               } else {
-                setTelegramConnectionStatus(`⚠️ Bot connected but channel access failed: ${testResult.description}`);
+                setTelegramConnectionStatus(`⚠️ Bot connected but channel access failed: ${testData.description}`);
               }
             } catch (error) {
               setTelegramConnectionStatus('⚠️ Bot connected but channel test failed');
@@ -78,36 +91,111 @@ const DevTool = () => {
           }, 1000);
         }
       } else {
-        setTelegramConnectionStatus(`❌ Bot connection failed: ${botResult.description}`);
+        setTelegramConnectionStatus(`❌ Invalid bot token: ${data.description}`);
       }
-    } catch (error: any) {
-      setTelegramConnectionStatus(`❌ Connection failed: ${error.message}`);
+    } catch (error) {
+      setTelegramConnectionStatus('❌ Connection failed - Check your internet connection');
     }
     
     setTimeout(() => setTelegramConnectionStatus(''), 8000);
   };
 
-  // Mock data with enhanced structure
-  const mockVideos = [
-    { id: '1', title: 'Beautiful Animation Collection Vol.1', views: 15420, uploadDate: '2024-01-15', status: 'active', size: '245 MB' },
-    { id: '2', title: 'Premium Series Episode 5', views: 8932, uploadDate: '2024-01-14', status: 'active', size: '380 MB' },
-    { id: '3', title: 'Artistic Masterpiece Collection', views: 23187, uploadDate: '2024-01-13', status: 'pending', size: '512 MB' },
-    { id: '4', title: 'Studio Exclusive Release', views: 5643, uploadDate: '2024-01-12', status: 'active', size: '298 MB' },
-  ];
+  const handleTelegramUpload = async (file: File) => {
+    if (!telegramBotToken || !telegramChannelId) {
+      alert('❌ Please configure and save both Telegram bot token and channel ID first');
+      return;
+    }
 
-  const mockUsers = [
-    { id: '1', email: 'user1@example.com', joinDate: '2024-01-10', status: 'active', role: 'user' },
-    { id: '2', email: 'user2@example.com', joinDate: '2024-01-08', status: 'active', role: 'premium' },
-    { id: '3', email: 'user3@example.com', joinDate: '2024-01-05', status: 'inactive', role: 'user' },
-    { id: '4', email: 'admin@example.com', joinDate: '2024-01-01', status: 'active', role: 'admin' },
-  ];
+    // Validate file size (50MB Telegram limit)
+    const maxSize = 50 * 1024 * 1024; // 50MB
+    if (file.size > maxSize) {
+      alert(`❌ ${file.name} is too large. Telegram limit is 50MB per file`);
+      return;
+    }
 
-  const stats = {
-    totalVideos: mockVideos.length,
-    totalViews: mockVideos.reduce((sum, video) => sum + video.views, 0),
-    totalUsers: mockUsers.length,
-    activeUsers: mockUsers.filter(user => user.status === 'active').length,
-    storageUsed: '2.1 GB'
+    setIsUploading(true);
+    setUploadProgress(0);
+
+    const formData = new FormData();
+    formData.append('chat_id', telegramChannelId);
+    formData.append('document', file);
+    formData.append('caption', `📎 ${file.name}\n📱 Uploaded from ProxyHub DevTool\n📅 ${new Date().toLocaleString()}\n💾 Size: ${(file.size / (1024 * 1024)).toFixed(1)} MB`);
+
+    try {
+      // Simulate upload progress
+      const progressInterval = setInterval(() => {
+        setUploadProgress(prev => {
+          if (prev >= 90) {
+            clearInterval(progressInterval);
+            return 90;
+          }
+          return prev + Math.random() * 15;
+        });
+      }, 300);
+
+      const response = await fetch(`https://api.telegram.org/bot${telegramBotToken}/sendDocument`, {
+        method: 'POST',
+        body: formData
+      });
+
+      clearInterval(progressInterval);
+      setUploadProgress(100);
+
+      if (response.ok) {
+        const result = await response.json();
+        console.log('✅ Upload successful:', result);
+        
+        // Update mock files list
+        const newFile = {
+          id: Date.now().toString(),
+          fileName: file.name,
+          size: `${(file.size / (1024 * 1024)).toFixed(1)} MB`,
+          uploadDate: new Date().toISOString().split('T')[0],
+          type: file.type.startsWith('video') ? 'video' : file.type.startsWith('image') ? 'image' : 'document',
+          telegramUrl: result.result.document ? 
+            `https://t.me/c/${telegramChannelId.replace('-100', '')}/${result.result.message_id}` : 
+            '#',
+          fileId: result.result.document?.file_id || 'N/A'
+        };
+        
+        mockTelegramFiles.unshift(newFile);
+        
+        alert(`✅ File uploaded successfully!\n📎 File: ${file.name}\n🆔 File ID: ${newFile.fileId}\n🔗 Message ID: ${result.result.message_id}`);
+      } else {
+        const errorData = await response.json();
+        console.error('❌ Upload failed:', errorData);
+        alert(`❌ Upload failed: ${errorData.description || 'Unknown error'}\n\nTip: Make sure the bot is added to your channel as an admin.`);
+      }
+    } catch (error) {
+      console.error('❌ Telegram upload error:', error);
+      alert('❌ Error uploading to Telegram. Please check:\n• Your internet connection\n• Bot token is correct\n• Channel ID is correct\n• Bot is admin in the channel');
+    } finally {
+      setIsUploading(false);
+      setUploadProgress(0);
+    }
+  };
+
+  const handleFileUpload = async (files: FileList | null, type?: 'video' | 'image') => {
+    if (!files || files.length === 0) return;
+
+    for (const file of Array.from(files)) {
+      // Validate file type if specified
+      if (type === 'video' && !file.type.startsWith('video/')) {
+        alert(`❌ ${file.name} is not a video file`);
+        continue;
+      }
+      if (type === 'image' && !file.type.startsWith('image/')) {
+        alert(`❌ ${file.name} is not an image file`);
+        continue;
+      }
+
+      await handleTelegramUpload(file);
+      
+      // Add small delay between uploads to prevent rate limiting
+      if (files.length > 1) {
+        await new Promise(resolve => setTimeout(resolve, 1000));
+      }
+    }
   };
 
   const exportData = (type: string) => {
@@ -161,11 +249,35 @@ const DevTool = () => {
     console.log(`✅ Exported ${type} data to ${filename}`);
   };
 
+  // Mock data with enhanced structure
+  const mockVideos = [
+    { id: '1', title: 'Beautiful Animation Collection Vol.1', views: 15420, uploadDate: '2024-01-15', status: 'active', size: '245 MB' },
+    { id: '2', title: 'Premium Series Episode 5', views: 8932, uploadDate: '2024-01-14', status: 'active', size: '380 MB' },
+    { id: '3', title: 'Artistic Masterpiece Collection', views: 23187, uploadDate: '2024-01-13', status: 'pending', size: '512 MB' },
+    { id: '4', title: 'Studio Exclusive Release', views: 5643, uploadDate: '2024-01-12', status: 'active', size: '298 MB' },
+  ];
+
+  const mockUsers = [
+    { id: '1', email: 'user1@example.com', joinDate: '2024-01-10', status: 'active', role: 'user' },
+    { id: '2', email: 'user2@example.com', joinDate: '2024-01-08', status: 'active', role: 'premium' },
+    { id: '3', email: 'user3@example.com', joinDate: '2024-01-05', status: 'inactive', role: 'user' },
+    { id: '4', email: 'admin@example.com', joinDate: '2024-01-01', status: 'active', role: 'admin' },
+  ];
+
   const mockTelegramFiles = [
     { id: '1', fileName: 'sample_video.mp4', size: '245 MB', uploadDate: '2024-01-15', type: 'video', telegramUrl: 'https://t.me/c/123456/1', fileId: 'BAADBAADqwADBREAAYag2DP7l26UWBYECgQ' },
     { id: '2', fileName: 'thumbnail_001.jpg', size: '2.1 MB', uploadDate: '2024-01-15', type: 'image', telegramUrl: 'https://t.me/c/123456/2', fileId: 'BAADBAADrAADBREAAYag2DP7l26UWBYECgQ' },
     { id: '3', fileName: 'documentation.pdf', size: '5.3 MB', uploadDate: '2024-01-14', type: 'document', telegramUrl: 'https://t.me/c/123456/3', fileId: 'BAADBAADsAADBREAAYag2DP7l26UWBYECgQ' },
   ];
+
+  const stats = {
+    totalVideos: mockVideos.length,
+    totalViews: mockVideos.reduce((sum, video) => sum + video.views, 0),
+    totalUsers: mockUsers.length,
+    activeUsers: mockUsers.filter(user => user.status === 'active').length,
+    telegramFiles: mockTelegramFiles.length,
+    storageUsed: '2.1 GB'
+  };
 
   if (!isAuthenticated) {
     return (
@@ -361,6 +473,7 @@ const DevTool = () => {
 
               {/* Telegram Content Feed */}
               <TelegramContentFeed 
+                botToken={telegramBotToken}
                 channelId={telegramChannelId}
               />
             </div>
@@ -495,21 +608,34 @@ const DevTool = () => {
               
               <div className="mb-4 p-3 bg-blue-500/10 border border-blue-500/20 rounded-lg">
                 <p className="text-sm text-blue-600 dark:text-blue-400">
-                  🔒 <strong>Bot Token:</strong> Securely stored in Supabase secrets!<br/>
+                  🤖 <strong>Bot Token:</strong> Already configured and saved!<br/>
                   📋 <strong>Next step:</strong> Add your channel ID below and test the connection.
                 </p>
               </div>
 
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-foreground mb-2">Channel ID</label>
-                <input
-                  type="text"
-                  value={telegramChannelId}
-                  onChange={(e) => setTelegramChannelId(e.target.value)}
-                  placeholder="-1001234567890"
-                  className="w-full px-4 py-2 bg-muted/50 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
-                />
-                <p className="text-xs text-muted-foreground mt-1">Your private channel ID (must start with -100)</p>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <div>
+                  <label className="block text-sm font-medium text-foreground mb-2">Bot Token</label>
+                  <input
+                    type="password"
+                    value={telegramBotToken}
+                    onChange={(e) => setTelegramBotToken(e.target.value)}
+                    placeholder="Enter your Telegram bot token..."
+                    className="w-full px-4 py-2 bg-muted/50 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                  />
+                  <p className="text-xs text-muted-foreground mt-1">Token from @BotFather</p>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-foreground mb-2">Channel ID</label>
+                  <input
+                    type="text"
+                    value={telegramChannelId}
+                    onChange={(e) => setTelegramChannelId(e.target.value)}
+                    placeholder="-1001234567890"
+                    className="w-full px-4 py-2 bg-muted/50 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                  />
+                  <p className="text-xs text-muted-foreground mt-1">Your private channel ID (must start with -100)</p>
+                </div>
               </div>
               
               {telegramConnectionStatus && (
@@ -528,7 +654,7 @@ const DevTool = () => {
                   className="btn-primary flex items-center space-x-2"
                 >
                   <Check className="w-4 h-4" />
-                  <span>Save Channel ID</span>
+                  <span>Save Credentials</span>
                 </button>
                 <button 
                   onClick={testTelegramConnection}
@@ -614,6 +740,7 @@ const DevTool = () => {
       <VideoUploadModal 
         isOpen={isVideoUploadModalOpen}
         onClose={() => setIsVideoUploadModalOpen(false)}
+        botToken={telegramBotToken}
         channelId={telegramChannelId}
         onUploadSuccess={() => {
           // Refresh the content feed after successful upload

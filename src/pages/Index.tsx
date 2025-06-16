@@ -8,6 +8,7 @@ const Index = () => {
   const [activeTab, setActiveTab] = useState('trending');
 
   // Get Telegram credentials from localStorage
+  const telegramBotToken = localStorage.getItem('telegram_bot_token') || '7704391228:AAGvi1-1Mg4AttZfzvmmdFwFHefMZaT0zNM';
   const telegramChannelId = localStorage.getItem('telegram_channel_id') || '';
 
   const tabs = [
@@ -50,6 +51,7 @@ const Index = () => {
         {/* Telegram Content Feed */}
         {telegramChannelId ? (
           <TelegramContentFeed 
+            botToken={telegramBotToken}
             channelId={telegramChannelId}
             className="animate-fade-in"
           />

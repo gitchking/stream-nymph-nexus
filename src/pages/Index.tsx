@@ -1,67 +1,15 @@
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Flame, TrendingUp, Clock, Star, Globe } from 'lucide-react';
 import Header from '../components/Header';
-import VideoCard from '../components/VideoCard';
+import TelegramContentFeed from '../components/TelegramContentFeed';
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState('trending');
-  const [videos, setVideos] = useState([
-    {
-      id: '1',
-      title: 'Beautiful Animation Collection Vol.1',
-      thumbnail: '/placeholder.svg',
-      duration: '12:34',
-      tags: ['animation', 'collection', 'hd'],
-      uploadDate: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
-      views: 15420
-    },
-    {
-      id: '2',
-      title: 'Premium Series Episode 5',
-      thumbnail: '/placeholder.svg', 
-      duration: '8:45',
-      tags: ['series', 'premium', 'episode'],
-      uploadDate: new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString(),
-      views: 8932
-    },
-    {
-      id: '3',
-      title: 'Artistic Masterpiece Collection',
-      thumbnail: '/placeholder.svg',
-      duration: '15:22',
-      tags: ['artistic', 'masterpiece', 'collection'],
-      uploadDate: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
-      views: 23187
-    },
-    {
-      id: '4',
-      title: 'Studio Exclusive Release',
-      thumbnail: '/placeholder.svg',
-      duration: '20:15',
-      tags: ['exclusive', 'studio', 'new'],
-      uploadDate: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
-      views: 5643
-    },
-    {
-      id: '5',
-      title: 'Classic Collection Remastered',
-      thumbnail: '/placeholder.svg',
-      duration: '18:30',
-      tags: ['classic', 'remastered', 'collection'],
-      uploadDate: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
-      views: 12087
-    },
-    {
-      id: '6',
-      title: 'Latest Release - High Quality',
-      thumbnail: '/placeholder.svg',
-      duration: '14:12',
-      tags: ['latest', 'hq', 'new'],
-      uploadDate: new Date(Date.now() - 1 * 60 * 60 * 1000).toISOString(),
-      views: 3245
-    }
-  ]);
+
+  // Get Telegram credentials from localStorage
+  const telegramBotToken = localStorage.getItem('telegram_bot_token') || '7704391228:AAGvi1-1Mg4AttZfzvmmdFwFHefMZaT0zNM';
+  const telegramChannelId = localStorage.getItem('telegram_channel_id') || '';
 
   const tabs = [
     { id: 'trending', label: 'Trending', icon: TrendingUp },
@@ -100,25 +48,28 @@ const Index = () => {
           </div>
         </div>
 
-        {/* Video Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 animate-fade-in">
-          {videos.map((video, index) => (
-            <div
-              key={video.id}
-              className="animate-slide-up"
-              style={{ animationDelay: `${index * 0.1}s` }}
+        {/* Telegram Content Feed */}
+        {telegramChannelId ? (
+          <TelegramContentFeed 
+            botToken={telegramBotToken}
+            channelId={telegramChannelId}
+            className="animate-fade-in"
+          />
+        ) : (
+          <div className="text-center py-12">
+            <div className="text-6xl mb-4">🤖</div>
+            <h3 className="text-xl font-semibold text-foreground mb-2">Telegram Channel Not Configured</h3>
+            <p className="text-muted-foreground mb-4">
+              Please configure your Telegram channel in the DevTool to see content here.
+            </p>
+            <a 
+              href="/dev-tool" 
+              className="btn-primary inline-flex items-center space-x-2"
             >
-              <VideoCard {...video} />
-            </div>
-          ))}
-        </div>
-
-        {/* Load More */}
-        <div className="text-center mt-12">
-          <button className="btn-primary">
-            Load More Videos
-          </button>
-        </div>
+              <span>Configure Telegram</span>
+            </a>
+          </div>
+        )}
       </main>
 
       {/* Blurred Footer */}

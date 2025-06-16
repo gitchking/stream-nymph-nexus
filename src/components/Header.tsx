@@ -20,13 +20,10 @@ const Header = () => {
           <span className="text-xl font-bold text-gradient">ProxyHub</span>
         </Link>
 
-        {/* Desktop Navigation */}
+        {/* Desktop Navigation - removed Studio link */}
         <nav className="hidden md:flex items-center space-x-8">
           <Link to="/" className="text-sm font-medium hover:text-primary transition-colors">
             Home
-          </Link>
-          <Link to="/studio" className="text-sm font-medium hover:text-primary transition-colors">
-            Studio
           </Link>
         </nav>
 
@@ -81,7 +78,7 @@ const Header = () => {
               />
             </div>
 
-            {/* Mobile Navigation */}
+            {/* Mobile Navigation - removed Studio link */}
             <nav className="flex flex-col space-y-2">
               <Link
                 to="/"
@@ -89,13 +86,6 @@ const Header = () => {
                 onClick={() => setIsMenuOpen(false)}
               >
                 Home
-              </Link>
-              <Link
-                to="/studio"
-                className="p-2 text-sm font-medium hover:bg-muted rounded-lg transition-colors"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                Studio
               </Link>
               <div className="flex items-center justify-between p-2">
                 <span className="text-sm font-medium">Theme</span>

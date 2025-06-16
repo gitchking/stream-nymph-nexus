@@ -1,10 +1,10 @@
-
 import { useState, useEffect } from 'react';
 import { Play, Calendar, Eye, ExternalLink, AlertCircle, RefreshCw } from 'lucide-react';
 import { useTelegramAPI } from '../hooks/useTelegramAPI';
 
 interface TelegramContentFeedProps {
   channelId: string;
+  className?: string;
 }
 
 interface TelegramPost {
@@ -49,7 +49,7 @@ interface TelegramPost {
   };
 }
 
-const TelegramContentFeed = ({ channelId }: TelegramContentFeedProps) => {
+const TelegramContentFeed = ({ channelId, className }: TelegramContentFeedProps) => {
   const [posts, setPosts] = useState<TelegramPost[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -65,27 +65,71 @@ const TelegramContentFeed = ({ channelId }: TelegramContentFeedProps) => {
     try {
       setLoading(true);
       setError(null);
+      console.log('🔄 Fetching channel posts...', { channelId });
+
+      // First, verify we can access the chat
+      const chatResult = await callTelegramAPI({
+        method: 'getChat',
+        channelId: channelId
+      });
+
+      console.log('📊 Chat info response:', chatResult);
+
+      if (!chatResult.ok) {
+        throw new Error(chatResult.description || 'Failed to access channel');
+      }
 
       // Try to get recent updates
-      const result = await callTelegramAPI({
+      const updatesResult = await callTelegramAPI({
         method: 'getChatHistory',
         channelId: channelId
       });
 
-      if (result.ok && result.result) {
+      console.log('📨 Updates response:', updatesResult);
+
+      if (updatesResult.ok && updatesResult.result) {
         // Filter for channel posts
-        const channelPosts = result.result
+        const channelPosts = updatesResult.result
           .filter((update: any) => update.channel_post)
           .map((update: any) => update.channel_post)
           .sort((a: any, b: any) => b.date - a.date);
 
-        setPosts(channelPosts);
-        
         if (channelPosts.length === 0) {
-          setError('No recent posts found. Try uploading some content to your channel!');
+          // Try alternative method: get messages by ID
+          console.log('🔄 Trying to fetch recent messages by ID...');
+          const recentMessages = [];
+          
+          // Try fetching last few message IDs
+          for (let i = 1; i <= 10; i++) {
+            try {
+              const messageResult = await callTelegramAPI({
+                method: 'forwardMessage',
+                data: {
+                  chat_id: channelId,
+                  from_chat_id: channelId,
+                  message_id: i
+                }
+              });
+              
+              if (messageResult.ok) {
+                recentMessages.push(messageResult.result);
+              }
+            } catch (e) {
+              // Ignore individual message fetch errors
+            }
+          }
+          
+          console.log('📝 Found messages:', recentMessages);
+          setPosts(recentMessages);
+          
+          if (recentMessages.length === 0) {
+            setError('No recent posts found. Try uploading some content to your channel!');
+          }
+        } else {
+          setPosts(channelPosts);
         }
       } else {
-        setError(result.description || 'Failed to fetch channel posts');
+        setError(updatesResult.description || 'Failed to fetch channel posts');
       }
     } catch (err: any) {
       console.error('Error fetching posts:', err);
@@ -170,7 +214,7 @@ const TelegramContentFeed = ({ channelId }: TelegramContentFeedProps) => {
   }
 
   return (
-    <div className="space-y-6">
+    <div className={`space-y-6 ${className || ''}`}>
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold text-foreground mb-2">Channel Content</h2>

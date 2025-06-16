@@ -1,12 +1,11 @@
-
 import React, { useState } from 'react';
 import { X, Upload, Video, Loader2, Check } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
+import { useTelegramAPI } from '../hooks/useTelegramAPI';
 
 interface VideoUploadModalProps {
   isOpen: boolean;
   onClose: () => void;
-  botToken: string;
   channelId: string;
   onUploadSuccess: () => void;
 }
@@ -14,7 +13,6 @@ interface VideoUploadModalProps {
 const VideoUploadModal: React.FC<VideoUploadModalProps> = ({
   isOpen,
   onClose,
-  botToken,
   channelId,
   onUploadSuccess
 }) => {
@@ -25,6 +23,7 @@ const VideoUploadModal: React.FC<VideoUploadModalProps> = ({
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [uploadStatus, setUploadStatus] = useState('');
+  const { callTelegramAPI } = useTelegramAPI();
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
@@ -50,7 +49,7 @@ const VideoUploadModal: React.FC<VideoUploadModalProps> = ({
   };
 
   const handleUpload = async () => {
-    if (!file || !botToken || !channelId) {
+    if (!file || !channelId) {
       alert('Please select a file and ensure Telegram is configured');
       return;
     }
@@ -90,16 +89,14 @@ const VideoUploadModal: React.FC<VideoUploadModalProps> = ({
 
       setUploadStatus('Uploading video...');
 
-      // Upload to Telegram as video
-      const response = await fetch(`https://api.telegram.org/bot${botToken}/sendVideo`, {
-        method: 'POST',
-        body: formData
+      // Upload via secure proxy
+      const result = await callTelegramAPI({
+        method: 'sendVideo',
+        data: formData
       });
 
       clearInterval(progressInterval);
       setUploadProgress(100);
-
-      const result = await response.json();
 
       if (result.ok) {
         setUploadStatus('✅ Upload successful!');
